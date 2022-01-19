@@ -1,0 +1,9 @@
+const path = require('path')
+
+// console.log(path.dirname(__filename))
+// console.log(path.basename(__filename))
+// console.log(path.extname(__filename).slice(1))
+// console.log(path.parse(__filename).dir)
+// console.log(path.parse(__filename)['ext'].slice(1))
+console.log(path.resolve(__dirname, '..', './modules', 'app.js'))
+console.log(path.join(__dirname, '..', './modules', 'app.js'))
