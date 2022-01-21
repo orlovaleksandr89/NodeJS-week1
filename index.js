@@ -1,40 +1,62 @@
-const yargs = require('yargs')
-const pkg = require('./package.json')
+const express = require('express')
 const chalk = require('chalk')
+const PORT = 3000
+const path = require('path')
+const {
+  addNote,
+  getNotes,
+  removeNoteById,
+  updateNote
+} = require('./notes.controller')
 
-const { printNotes, addNote, removeNoteById } = require('./notes.controller')
-yargs.version(pkg.version)
+const app = express()
+app.use(express.json())
+app.set('view engine', 'ejs')
+app.set('views', 'pages')
 
-yargs.command({
-  command: 'add',
-  describe: 'Add new note to list',
-  builder: {
-    title: {
-      type: 'string',
-      describe: 'Note title',
-      demandOptions: true
-    }
-  },
-  handler({ title }) {
-    addNote(title)
-  }
-})
-yargs.command({
-  command: 'list',
-  describe: 'print all notes',
-  handler() {
-    printNotes()
-  }
-})
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+)
 
-yargs.command({
-  command: 'remove',
-  describe: 'Remove note from list by Id',
-  builder: {
-    id: { type: 'string', describe: 'Note Id', demandOptions: true }
-  },
-  handler({ id }) {
-    removeNoteById(id)
-  }
+app.use(express.static(path.join(__dirname, 'public')))
+
+app.get('/', async (req, res) => {
+  res.render('index', {
+    title: 'Express app',
+    notes: await getNotes(),
+    created: false,
+    deleted: false
+  })
 })
-yargs.parse()
+app.post('/', async (req, res) => {
+  const { title } = req.body
+  await addNote(title)
+  res.render('index', {
+    title: 'Express app',
+    notes: await getNotes(),
+    created: true
+  })
+})
+app.delete('/', async (req, res) => {
+  const { id } = req.body
+  await removeNoteById(id)
+  res.render('index', {
+    title: 'Express app',
+    notes: await getNotes(),
+    created: false
+  })
+})
+app.put('/', async (req, res) => {
+  const { id, title } = req.body
+  await updateNote(id, title)
+  res.render('index', {
+    title: 'Express app',
+    notes: await getNotes(),
+    created: false
+  })
+})
+app.listen(PORT, () => {
+  console.log(chalk.greenBright(`Server workin on port: ${PORT}`))
+})

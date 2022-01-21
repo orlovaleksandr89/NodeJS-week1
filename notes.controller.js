@@ -49,8 +49,33 @@ async function printNotes() {
     console.log(chalk.blueBright(' id:', note._id + ',', 'title:', note.title))
   )
 }
+
+async function updateNote(noteId, title) {
+  const notes = await getNotes()
+
+  if (notes.length === 0) {
+    return console.log(chalk.red.bold('There are no notes to remove'))
+  }
+  if (notes.indexOf(notes.find((note) => note._id === noteId)) === -1) {
+    return console.log(chalk.red.bold("Note wasn't found"))
+  }
+  if (title.length === 0) {
+    console.log(chalk.red.bold("Note can't be empty"))
+    return
+  }
+  const updatedNotes = notes.map((note) => {
+    if (note._id === noteId) {
+      return { ...note, title: title }
+    }
+    return note
+  })
+  await fs.writeFile(notesPath, JSON.stringify(updatedNotes))
+  console.log(chalk.yellowBright('Note updated'))
+}
 module.exports = {
   addNote,
   printNotes,
-  removeNoteById
+  removeNoteById,
+  getNotes,
+  updateNote
 }
